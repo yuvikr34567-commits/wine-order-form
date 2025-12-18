@@ -34,11 +34,11 @@
             border-bottom: 3px solid #8b7355;
         }
         
-        .logo {
-            font-size: 2.5em;
-            color: #8b7355;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .logo-image {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
         }
         
         .subtitle {
@@ -206,36 +206,18 @@
             width: 150px;
         }
         
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .submit-btn, .whatsapp-btn {
-            flex: 1;
+        .whatsapp-btn {
+            width: 100%;
             padding: 18px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
             border: none;
             border-radius: 8px;
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-        }
-        
-        .submit-btn {
-            background: linear-gradient(135deg, #8b7355 0%, #6d5a44 100%);
-            color: white;
-        }
-        
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(139, 115, 85, 0.4);
-        }
-        
-        .whatsapp-btn {
-            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-            color: white;
+            margin-top: 20px;
         }
         
         .whatsapp-btn:hover {
@@ -256,8 +238,8 @@
                 padding: 20px;
             }
             
-            .logo {
-                font-size: 2em;
+            .logo-image {
+                max-width: 300px;
             }
             
             .subtitle {
@@ -281,17 +263,13 @@
                 display: block;
                 margin-bottom: 5px;
             }
-            
-            .button-group {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🍷 Mouton Noir Wine Group</div>
+            <img src="https://nyc3.digitaloceanspaces.com/bhindi-drive/files/f8aab82f-3701-4779-890f-90487eda1346/2025-12-18T11-33-37-923Z-5ef2937a-chat-image-1766057617903-0.jpg" alt="Mouton Noir Wine Group" class="logo-image">
             <div class="subtitle">WINE TASTING ORDER FORM</div>
         </div>
         
@@ -427,10 +405,7 @@
                 </p>
             </div>
             
-            <div class="button-group">
-                <button type="submit" class="submit-btn">📧 Send via Email</button>
-                <button type="button" class="whatsapp-btn" onclick="sendToWhatsApp()">📱 Send via WhatsApp</button>
-            </div>
+            <button type="button" class="whatsapp-btn" onclick="sendToWhatsApp()">📱 Send Order via WhatsApp</button>
         </form>
         
         <div class="contact-info">
@@ -554,64 +529,17 @@
             message += `*TOTAL:* ${encodeURIComponent(formData.total)}%0A%0A`;
             message += `Payment can be arranged separately.`;
             
-            // WhatsApp URL
-            const whatsappURL = `https://wa.me/919939014577?text=${message}`;
+            // WhatsApp URL with updated number
+            const whatsappURL = `https://wa.me/19173284445?text=${message}`;
             
             // Open WhatsApp
             window.open(whatsappURL, '_blank');
             
             // Show success message
             setTimeout(() => {
-                alert(`Order prepared for WhatsApp!\n\nTotal: ${formData.total}\n\nYour WhatsApp should open with the order details ready to send.`);
+                alert(`Order prepared for WhatsApp!\n\nTotal: ${formData.total}\n\nYour WhatsApp should open with the order details ready to send to Cindy Lamb.`);
             }, 500);
         }
-        
-        // Handle email form submission
-        document.getElementById('orderForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            if (!validateForm()) return;
-            
-            const formData = collectFormData();
-            
-            // Create email subject and body
-            const subject = encodeURIComponent(`Wine Order - ${formData.name} - ${formData.date}`);
-            
-            let emailBody = `NEW WINE ORDER\n\n`;
-            emailBody += `Date: ${formData.date}\n\n`;
-            emailBody += `CUSTOMER INFORMATION:\n`;
-            emailBody += `Name: ${formData.name}\n`;
-            emailBody += `Phone: ${formData.phone}\n`;
-            emailBody += `Email: ${formData.email}\n`;
-            emailBody += `Address: ${formData.address}\n`;
-            if (formData.addressDesc) emailBody += `Address Description: ${formData.addressDesc}\n`;
-            if (formData.security) emailBody += `Security: ${formData.security}\n`;
-            emailBody += `Town: ${formData.town}\n\n`;
-            emailBody += `WINE ORDER:\n`;
-            emailBody += `----------------------------------------\n`;
-            formData.wines.forEach(wine => {
-                emailBody += `${wine.name}\n`;
-                emailBody += `  Price: $${wine.price} x ${wine.quantity} = ${wine.subtotal}\n`;
-            });
-            emailBody += `----------------------------------------\n`;
-            emailBody += `Subtotal: ${formData.subtotal}\n`;
-            emailBody += `10% OFF: ${formData.discount}\n`;
-            emailBody += `TOTAL: ${formData.total}\n\n`;
-            emailBody += `Payment can be arranged separately.\n`;
-            
-            const encodedBody = encodeURIComponent(emailBody);
-            
-            // Create mailto link
-            const mailtoLink = `mailto:MoutonNoirWine@gmail.com?subject=${subject}&body=${encodedBody}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
-            
-            // Show success message
-            setTimeout(() => {
-                alert(`Order submitted successfully!\n\nTotal: ${formData.total}\n\nYour email client should open with the order details. Please send the email to complete your order.\n\nPayment can be arranged later using the payment options provided.`);
-            }, 500);
-        });
         
         // Initial calculation
         calculateTotals();
