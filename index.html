@@ -206,23 +206,41 @@
             width: 150px;
         }
         
-        .submit-btn {
-            width: 100%;
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .submit-btn, .whatsapp-btn {
+            flex: 1;
             padding: 18px;
-            background: linear-gradient(135deg, #8b7355 0%, #6d5a44 100%);
-            color: white;
             border: none;
             border-radius: 8px;
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 20px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #8b7355 0%, #6d5a44 100%);
+            color: white;
         }
         
         .submit-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(139, 115, 85, 0.4);
+        }
+        
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+        }
+        
+        .whatsapp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
         }
         
         .contact-info {
@@ -262,6 +280,10 @@
             .payment-option strong {
                 display: block;
                 margin-bottom: 5px;
+            }
+            
+            .button-group {
+                flex-direction: column;
             }
         }
     </style>
@@ -405,7 +427,10 @@
                 </p>
             </div>
             
-            <button type="submit" class="submit-btn">Submit Order</button>
+            <div class="button-group">
+                <button type="submit" class="submit-btn">📧 Send via Email</button>
+                <button type="button" class="whatsapp-btn" onclick="sendToWhatsApp()">📱 Send via WhatsApp</button>
+            </div>
         </form>
         
         <div class="contact-info">
@@ -449,11 +474,8 @@
             input.addEventListener('input', calculateTotals);
         });
         
-        // Handle form submission
-        document.getElementById('orderForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Collect order data
+        // Collect form data function
+        function collectFormData() {
             const formData = {
                 name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
@@ -483,11 +505,74 @@
                 }
             });
             
-            // Check if any wines were ordered
+            return formData;
+        }
+        
+        // Validate form
+        function validateForm() {
+            const form = document.getElementById('orderForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+            
+            const formData = collectFormData();
             if (formData.wines.length === 0) {
                 alert('Please select at least one wine to order.');
-                return;
+                return false;
             }
+            
+            return true;
+        }
+        
+        // Send to WhatsApp function
+        function sendToWhatsApp() {
+            if (!validateForm()) return;
+            
+            const formData = collectFormData();
+            
+            // Format WhatsApp message
+            let message = `*🍷 WINE ORDER - MOUTON NOIR*%0A%0A`;
+            message += `*Date:* ${formData.date}%0A%0A`;
+            message += `*📋 CUSTOMER INFORMATION*%0A`;
+            message += `*Name:* ${encodeURIComponent(formData.name)}%0A`;
+            message += `*Phone:* ${encodeURIComponent(formData.phone)}%0A`;
+            message += `*Email:* ${encodeURIComponent(formData.email)}%0A`;
+            message += `*Address:* ${encodeURIComponent(formData.address)}%0A`;
+            if (formData.addressDesc) message += `*Address Description:* ${encodeURIComponent(formData.addressDesc)}%0A`;
+            if (formData.security) message += `*Security:* ${encodeURIComponent(formData.security)}%0A`;
+            message += `*Town:* ${encodeURIComponent(formData.town)}%0A%0A`;
+            message += `*🍾 WINE ORDER*%0A`;
+            message += `━━━━━━━━━━━━━━━━━━━━%0A`;
+            formData.wines.forEach(wine => {
+                message += `*${encodeURIComponent(wine.name)}*%0A`;
+                message += `  $${wine.price} × ${wine.quantity} = ${encodeURIComponent(wine.subtotal)}%0A`;
+            });
+            message += `━━━━━━━━━━━━━━━━━━━━%0A`;
+            message += `*Subtotal:* ${encodeURIComponent(formData.subtotal)}%0A`;
+            message += `*10% OFF:* ${encodeURIComponent(formData.discount)}%0A`;
+            message += `*TOTAL:* ${encodeURIComponent(formData.total)}%0A%0A`;
+            message += `Payment can be arranged separately.`;
+            
+            // WhatsApp URL
+            const whatsappURL = `https://wa.me/919939014577?text=${message}`;
+            
+            // Open WhatsApp
+            window.open(whatsappURL, '_blank');
+            
+            // Show success message
+            setTimeout(() => {
+                alert(`Order prepared for WhatsApp!\n\nTotal: ${formData.total}\n\nYour WhatsApp should open with the order details ready to send.`);
+            }, 500);
+        }
+        
+        // Handle email form submission
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) return;
+            
+            const formData = collectFormData();
             
             // Create email subject and body
             const subject = encodeURIComponent(`Wine Order - ${formData.name} - ${formData.date}`);
