@@ -184,14 +184,14 @@
         }
         
         .payment-info {
-            background: #fff3cd;
+            background: #e8f5e9;
             padding: 20px;
             border-radius: 8px;
-            border-left: 5px solid #8b7355;
+            border-left: 5px solid #4caf50;
         }
         
         .payment-info h3 {
-            color: #8b7355;
+            color: #2e7d32;
             margin-bottom: 15px;
         }
         
@@ -381,7 +381,10 @@
             </div>
             
             <div class="payment-info">
-                <h3>Payment Options</h3>
+                <h3>💳 Payment Options (Optional - Pay Later)</h3>
+                <p style="margin-bottom: 15px; color: #2e7d32; font-weight: 500;">
+                    You can submit your order now and arrange payment later. Payment details are provided for your convenience.
+                </p>
                 <div class="payment-option">
                     <strong>Company:</strong> Distribuidora E Importador Sabores Argentinos S.A. CTA #909798654
                 </div>
@@ -408,6 +411,7 @@
         <div class="contact-info">
             <p><strong>Wine Rep:</strong> Cindy Lamb</p>
             <p>📞 +1-917-328-4445 / +506-8792-4130</p>
+            <p>📧 MoutonNoirWine@gmail.com</p>
             <p>Thank you!</p>
         </div>
     </div>
@@ -485,7 +489,9 @@
                 return;
             }
             
-            // Create email body
+            // Create email subject and body
+            const subject = encodeURIComponent(`Wine Order - ${formData.name} - ${formData.date}`);
+            
             let emailBody = `NEW WINE ORDER\n\n`;
             emailBody += `Date: ${formData.date}\n\n`;
             emailBody += `CUSTOMER INFORMATION:\n`;
@@ -493,24 +499,33 @@
             emailBody += `Phone: ${formData.phone}\n`;
             emailBody += `Email: ${formData.email}\n`;
             emailBody += `Address: ${formData.address}\n`;
-            emailBody += `Address Description: ${formData.addressDesc}\n`;
-            emailBody += `Security: ${formData.security}\n`;
+            if (formData.addressDesc) emailBody += `Address Description: ${formData.addressDesc}\n`;
+            if (formData.security) emailBody += `Security: ${formData.security}\n`;
             emailBody += `Town: ${formData.town}\n\n`;
             emailBody += `WINE ORDER:\n`;
+            emailBody += `----------------------------------------\n`;
             formData.wines.forEach(wine => {
-                emailBody += `${wine.name} - Qty: ${wine.quantity} - ${wine.subtotal}\n`;
+                emailBody += `${wine.name}\n`;
+                emailBody += `  Price: $${wine.price} x ${wine.quantity} = ${wine.subtotal}\n`;
             });
-            emailBody += `\nSubtotal: ${formData.subtotal}\n`;
+            emailBody += `----------------------------------------\n`;
+            emailBody += `Subtotal: ${formData.subtotal}\n`;
             emailBody += `10% OFF: ${formData.discount}\n`;
-            emailBody += `TOTAL: ${formData.total}\n`;
+            emailBody += `TOTAL: ${formData.total}\n\n`;
+            emailBody += `Payment can be arranged separately.\n`;
             
-            // For now, show success message and log data
-            console.log('Order Data:', formData);
-            alert('Order submitted successfully! Your order details have been recorded.\n\nTotal: ' + formData.total + '\n\nPlease proceed with payment using one of the payment options listed above.');
+            const encodedBody = encodeURIComponent(emailBody);
             
-            // Optional: Reset form
-            // this.reset();
-            // calculateTotals();
+            // Create mailto link
+            const mailtoLink = `mailto:MoutonNoirWine@gmail.com?subject=${subject}&body=${encodedBody}`;
+            
+            // Open email client
+            window.location.href = mailtoLink;
+            
+            // Show success message
+            setTimeout(() => {
+                alert(`Order submitted successfully!\n\nTotal: ${formData.total}\n\nYour email client should open with the order details. Please send the email to complete your order.\n\nPayment can be arranged later using the payment options provided.`);
+            }, 500);
         });
         
         // Initial calculation
