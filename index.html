@@ -219,7 +219,7 @@
         .submit-btn {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(135deg, #8b7355 0%, #6d5a44 100%);
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -232,7 +232,7 @@
         
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(139, 115, 85, 0.4);
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
         }
         
         .contact-info {
@@ -411,7 +411,7 @@
                 </p>
             </div>
             
-            <button type="submit" class="submit-btn">📱 Submit Order via Phone</button>
+            <button type="submit" class="submit-btn">📱 Send Order via WhatsApp</button>
         </form>
         
         <div class="contact-info">
@@ -489,42 +489,29 @@
                 return;
             }
             
-            // Create message for phone submission
-            let message = `WINE ORDER - Jan 20/26\n\n`;
-            message += `Customer: ${formData.name}\n`;
-            message += `Phone: ${formData.phone}\n`;
-            message += `Email: ${formData.email}\n`;
-            message += `Address: ${formData.address}\n`;
-            if (formData.addressDesc) message += `Description: ${formData.addressDesc}\n`;
-            message += `Town: ${formData.town}\n`;
-            if (formData.security) message += `Security: ${formData.security}\n`;
-            message += `\nWINES:\n`;
+            // Create message for WhatsApp
+            let message = `🍷 *WINE ORDER - Jan 20/26*\n\n`;
+            message += `*Customer:* ${formData.name}\n`;
+            message += `*Phone:* ${formData.phone}\n`;
+            message += `*Email:* ${formData.email}\n`;
+            message += `*Address:* ${formData.address}\n`;
+            if (formData.addressDesc) message += `*Description:* ${formData.addressDesc}\n`;
+            message += `*Town:* ${formData.town}\n`;
+            if (formData.security) message += `*Security:* ${formData.security}\n`;
+            message += `\n*WINES:*\n`;
             formData.wines.forEach(wine => {
-                message += `${wine.name} x${wine.quantity} = ${wine.subtotal}\n`;
+                message += `• ${wine.name} x${wine.quantity} = ${wine.subtotal}\n`;
             });
-            message += `\nSubtotal: ${formData.subtotal}\n`;
-            message += `10% OFF: ${formData.discount}\n`;
-            message += `TOTAL: ${formData.total}`;
+            message += `\n*Subtotal:* ${formData.subtotal}\n`;
+            message += `*10% OFF:* ${formData.discount}\n`;
+            message += `*TOTAL:* ${formData.total}`;
             
-            // Encode message for phone/SMS
+            // Encode message for WhatsApp
             const encodedMessage = encodeURIComponent(message);
-            const phoneNumber = '+19173284445'; // Cindy Lamb's number
+            const phoneNumber = '19173284445'; // Cindy Lamb's number (without + for WhatsApp)
             
-            // Try to open phone app with pre-filled message
-            // For SMS: window.location.href = `sms:${phoneNumber}?body=${encodedMessage}`;
-            // For WhatsApp: window.location.href = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-            
-            // Show confirmation with option to call or message
-            if (confirm('Order ready to submit!\n\nTotal: ' + formData.total + '\n\nClick OK to call Cindy Lamb, or Cancel to copy order details.')) {
-                window.location.href = `tel:${phoneNumber}`;
-            } else {
-                // Copy to clipboard
-                navigator.clipboard.writeText(message).then(() => {
-                    alert('Order details copied to clipboard! You can now paste and send via your preferred method.');
-                }).catch(() => {
-                    alert('Order Details:\n\n' + message);
-                });
-            }
+            // Open WhatsApp with pre-filled message
+            window.location.href = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
         });
         
         // Initial calculation
