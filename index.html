@@ -197,6 +197,7 @@
             padding: 20px;
             border-radius: 8px;
             border-left: 5px solid #8b7355;
+            margin-bottom: 20px;
         }
         
         .payment-info h3 {
@@ -213,6 +214,21 @@
             color: #333;
             display: inline-block;
             width: 150px;
+        }
+        
+        .convenience-note {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #4caf50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .convenience-note p {
+            color: #2e7d32;
+            font-size: 1.05em;
+            margin: 0;
         }
         
         .submit-btn {
@@ -389,7 +405,7 @@
             </div>
             
             <div class="payment-info">
-                <h3>Payment Options:</h3>
+                <h3>Payment Options</h3>
                 <div class="payment-option">
                     <strong>Company:</strong> Distribuidora E Importador Sabores Argentinos S.A. CTA #909798654
                 </div>
@@ -410,7 +426,11 @@
                 </p>
             </div>
             
-            <button type="submit" class="submit-btn">Submit Order</button>
+            <div class="convenience-note">
+                <p>You can submit your order now and pay later at your convenience.</p>
+            </div>
+            
+            <button type="submit" class="submit-btn">📱 Submit Order via Phone</button>
         </form>
         
         <div class="contact-info">
@@ -488,33 +508,42 @@
                 return;
             }
             
-            // Create email body
-            let emailBody = `NEW WINE ORDER\n\n`;
-            emailBody += `Location: CUIDAD DEL MAR\n`;
-            emailBody += `Date: Jan 20/26\n\n`;
-            emailBody += `CUSTOMER INFORMATION:\n`;
-            emailBody += `Name: ${formData.name}\n`;
-            emailBody += `Phone: ${formData.phone}\n`;
-            emailBody += `Email: ${formData.email}\n`;
-            emailBody += `Delivery Address: ${formData.address}\n`;
-            emailBody += `Address Description: ${formData.addressDesc}\n`;
-            emailBody += `Town: ${formData.town}\n`;
-            emailBody += `Security Guard: ${formData.security}\n\n`;
-            emailBody += `WINE ORDER:\n`;
+            // Create message for phone submission
+            let message = `WINE ORDER - Jan 20/26\n\n`;
+            message += `Customer: ${formData.name}\n`;
+            message += `Phone: ${formData.phone}\n`;
+            message += `Email: ${formData.email}\n`;
+            message += `Address: ${formData.address}\n`;
+            if (formData.addressDesc) message += `Description: ${formData.addressDesc}\n`;
+            message += `Town: ${formData.town}\n`;
+            if (formData.security) message += `Security: ${formData.security}\n`;
+            message += `\nWINES:\n`;
             formData.wines.forEach(wine => {
-                emailBody += `${wine.name} - Qty: ${wine.quantity} - ${wine.subtotal}\n`;
+                message += `${wine.name} x${wine.quantity} = ${wine.subtotal}\n`;
             });
-            emailBody += `\nSubtotal: ${formData.subtotal}\n`;
-            emailBody += `10% OFF: ${formData.discount}\n`;
-            emailBody += `TOTAL: ${formData.total}\n`;
+            message += `\nSubtotal: ${formData.subtotal}\n`;
+            message += `10% OFF: ${formData.discount}\n`;
+            message += `TOTAL: ${formData.total}`;
             
-            // For now, show success message and log data
-            console.log('Order Data:', formData);
-            alert('Order submitted successfully! Your order details have been recorded.\n\nTotal: ' + formData.total + '\n\nPlease proceed with payment using one of the payment options listed above.');
+            // Encode message for phone/SMS
+            const encodedMessage = encodeURIComponent(message);
+            const phoneNumber = '+19173284445'; // Cindy Lamb's number
             
-            // Optional: Reset form
-            // this.reset();
-            // calculateTotals();
+            // Try to open phone app with pre-filled message
+            // For SMS: window.location.href = `sms:${phoneNumber}?body=${encodedMessage}`;
+            // For WhatsApp: window.location.href = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            
+            // Show confirmation with option to call or message
+            if (confirm('Order ready to submit!\n\nTotal: ' + formData.total + '\n\nClick OK to call Cindy Lamb, or Cancel to copy order details.')) {
+                window.location.href = `tel:${phoneNumber}`;
+            } else {
+                // Copy to clipboard
+                navigator.clipboard.writeText(message).then(() => {
+                    alert('Order details copied to clipboard! You can now paste and send via your preferred method.');
+                }).catch(() => {
+                    alert('Order Details:\n\n' + message);
+                });
+            }
         });
         
         // Initial calculation
