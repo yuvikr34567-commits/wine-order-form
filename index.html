@@ -168,20 +168,38 @@
             margin: 20px 0;
         }
         
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
+        .totals-table {
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            border-collapse: collapse;
+        }
+        
+        .totals-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
             font-size: 1.1em;
         }
         
-        .total-row.final {
-            border-top: 3px solid #8b7355;
-            margin-top: 10px;
-            padding-top: 15px;
-            font-size: 1.4em;
+        .totals-table td:first-child {
+            font-weight: 600;
+            background: #f0f0f0;
+        }
+        
+        .totals-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        .totals-table tr:last-child td {
+            background: #8b7355;
+            color: white;
+            font-size: 1.3em;
             font-weight: bold;
-            color: #8b7355;
+        }
+        
+        .discount-row td {
+            color: #d32f2f;
         }
         
         .payment-info {
@@ -264,6 +282,10 @@
                 display: block;
                 margin-bottom: 5px;
             }
+            
+            .totals-table {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -312,31 +334,31 @@
                                 <td class="wine-name">Mas Fi Cava</td>
                                 <td class="price">$ 15.00</td>
                                 <td><input type="number" class="qty-input" min="0" value="0" data-wine="Mas Fi Cava"></td>
-                                <td class="subtotal-cell">$ 0.00</td>
+                                <td class="subtotal-cell">$ -</td>
                             </tr>
                             <tr data-price="13.50">
                                 <td class="wine-name">Callia Pinot Grigio</td>
                                 <td class="price">$ 13.50</td>
                                 <td><input type="number" class="qty-input" min="0" value="0" data-wine="Callia Pinot Grigio"></td>
-                                <td class="subtotal-cell">$ 0.00</td>
+                                <td class="subtotal-cell">$ -</td>
                             </tr>
                             <tr data-price="18.00">
                                 <td class="wine-name">Altavista Sauvignon Blanc</td>
                                 <td class="price">$ 18.00</td>
                                 <td><input type="number" class="qty-input" min="0" value="0" data-wine="Altavista Sauvignon Blanc"></td>
-                                <td class="subtotal-cell">$ 0.00</td>
+                                <td class="subtotal-cell">$ -</td>
                             </tr>
                             <tr data-price="16.00">
                                 <td class="wine-name">Newen Pinot Noir</td>
                                 <td class="price">$ 16.00</td>
                                 <td><input type="number" class="qty-input" min="0" value="0" data-wine="Newen Pinot Noir"></td>
-                                <td class="subtotal-cell">$ 0.00</td>
+                                <td class="subtotal-cell">$ -</td>
                             </tr>
                             <tr data-price="19.50">
                                 <td class="wine-name">Tomero Malbec</td>
                                 <td class="price">$ 19.50</td>
                                 <td><input type="number" class="qty-input" min="0" value="0" data-wine="Tomero Malbec"></td>
-                                <td class="subtotal-cell">$ 0.00</td>
+                                <td class="subtotal-cell">$ -</td>
                             </tr>
                         </tbody>
                     </table>
@@ -344,10 +366,20 @@
             </div>
             
             <div class="totals-section">
-                <div class="total-row final">
-                    <span>TOTAL:</span>
-                    <span id="total">$ 0.00</span>
-                </div>
+                <table class="totals-table">
+                    <tr>
+                        <td>Subtotal</td>
+                        <td id="subtotal">$ -</td>
+                    </tr>
+                    <tr class="discount-row">
+                        <td>10% OFF</td>
+                        <td id="discount">$ -</td>
+                    </tr>
+                    <tr>
+                        <td>Total</td>
+                        <td id="total">$ -</td>
+                    </tr>
+                </table>
             </div>
             
             <div class="payment-info">
@@ -393,7 +425,7 @@
         
         // Calculate totals
         function calculateTotals() {
-            let total = 0;
+            let subtotal = 0;
             
             document.querySelectorAll('#wineTable tr').forEach(row => {
                 const price = parseFloat(row.dataset.price);
@@ -401,11 +433,21 @@
                 const qty = parseInt(qtyInput.value) || 0;
                 const itemSubtotal = price * qty;
                 
-                row.querySelector('.subtotal-cell').textContent = '$ ' + itemSubtotal.toFixed(2);
-                total += itemSubtotal;
+                if (itemSubtotal > 0) {
+                    row.querySelector('.subtotal-cell').textContent = '$ ' + itemSubtotal.toFixed(2);
+                } else {
+                    row.querySelector('.subtotal-cell').textContent = '$ -';
+                }
+                
+                subtotal += itemSubtotal;
             });
             
-            document.getElementById('total').textContent = '$ ' + total.toFixed(2);
+            const discount = subtotal * 0.10;
+            const total = subtotal - discount;
+            
+            document.getElementById('subtotal').textContent = subtotal > 0 ? '$ ' + subtotal.toFixed(2) : '$ -';
+            document.getElementById('discount').textContent = discount > 0 ? '$ ' + discount.toFixed(2) : '$ -';
+            document.getElementById('total').textContent = total > 0 ? '$ ' + total.toFixed(2) : '$ -';
         }
         
         // Add event listeners to all quantity inputs
@@ -428,6 +470,8 @@
                 phone: document.getElementById('phone').value,
                 address: document.getElementById('address').value,
                 wines: [],
+                subtotal: document.getElementById('subtotal').textContent,
+                discount: document.getElementById('discount').textContent,
                 total: document.getElementById('total').textContent
             };
             
@@ -485,6 +529,8 @@
                 message += `  $ ${parseFloat(wine.price).toFixed(2)} × ${wine.quantity} = ${encodeURIComponent(wine.subtotal)}%0A`;
             });
             message += `━━━━━━━━━━━━━━━━━━━━%0A`;
+            message += `*Subtotal:* ${encodeURIComponent(formData.subtotal)}%0A`;
+            message += `*10% OFF:* ${encodeURIComponent(formData.discount)}%0A`;
             message += `*TOTAL:* ${encodeURIComponent(formData.total)}%0A%0A`;
             message += `Payment can be arranged separately.`;
             
